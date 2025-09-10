@@ -11,23 +11,40 @@
 </head>
 <body>
     <div th:replace="~{fragments/header}"></div>
-    <div class="content">
-        <div><input type="text" id="searchSong"><button onclick="searchSong()">Tìm kiếm</button></div>
-        <h2>Danh Sách Bài Hát</h2>
-        <div id="song-list">
+
+    <div class="contentSongList">
+        <!-- Bên trái: sound wave -->
+        <div class="visualizer">
+          <canvas id="sound-visualizer" width="700" height="700"></canvas>
         </div>
-        <h3>Đang Phát</h3>
-        <audio id="audio-player" controls>
-            Your browser does not support the audio element.
-        </audio>
+
+        <!-- Bên phải: danh sách nhạc -->
+        <div class="song-section">
+            <div class="search-bar">
+                <input type="text" id="searchSong" placeholder="Tìm bài hát...">
+                <button onclick="searchSong()">🔍</button>
+            </div>
+
+            <h2>Danh Sách Bài Hát</h2>
+            <div id="song-list"></div>
+        </div>
     </div>
+
+    <!-- Player bar cố định -->
+    <div class="player-bar">
+        <audio id="audio-player" controls></audio>
+    </div>
+
+    <!-- Modal playlist -->
     <div id="playlist-modal" style="display: none;">
         <div class="modal-content">
             <h3>Chọn Danh Sách Phát</h3>
-            <div id="playlist-options">
-            </div>
+            <div id="playlist-options"></div>
             <button onclick="closeModal()">Đóng</button>
         </div>
     </div>
+    <div id="toast-container"></div>
 </body>
+
+
 </html>
