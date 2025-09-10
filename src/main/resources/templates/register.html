@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký</title>
+    <script th:src="@{/js/reg.js}"></script>
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+</head>
+<body>
+    <div th:replace="~{fragments/header}"></div>
+    <div class="content">
+        <h2>Đăng Ký Tài Khoản</h2>
+    <input type="text" id="username" placeholder="Tên đăng nhập" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Mật khẩu" required>
+    <button onclick="register()">Đăng Ký</button>
+    <p>Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tải Lên Bài Hát</title>
+    <script th:src="@{/js/up.js}"></script>
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+</head>
+<body>
+    <div th:replace="~{fragments/header}"></div>
+    <div class="content">
+        <h2>Tải Lên Bài Hát</h2>
+    <input type="file" id="songFile" accept="audio/*" required>
+    <input type="text" id="title" placeholder="Tên bài hát" required>
+    <input type="text" id="artist" placeholder="Nghệ sĩ" required>
+    <button onclick="uploadSong()">Tải Lên</button>
+    </div>
+</body>
+</html>

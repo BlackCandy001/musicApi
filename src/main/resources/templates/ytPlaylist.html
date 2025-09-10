@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API YouTube Demo</title>
+</head>
+
+<body>
+    <h1>Gọi API YouTube và Lấy Dữ Liệu</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL YouTube" />
+    <button onclick="getVideoData()">Lấy Dữ Liệu</button>
+
+    <h3>Thông Tin:</h3>
+    <pre id="result"></pre>
+
+    <script>
+        async function getVideoData() {
+            const proxyUrl = 'http://localhost:3000/proxy?url=';
+            const youtubeUrl = document.getElementById('urlInput').value;
+
+            // if (!youtubeUrl) {
+            //     alert("Vui lòng nhập URL YouTube");
+            //     return;
+            // }
+
+            try {
+                const response = await fetch(`http://localhost:3000/proxy?url=https://www.youtube.com/watch?v=XXYlFuWEuKI&list=RDQMgEzdN5RuCXE&start_radio=1`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                console.log(data); // Mảng scripts
+
+                const scripts = data.scripts;
+                let ytInitialDataMatch = null;
+                for (const script of scripts) {
+                    if (script.includes('ytInitialData')) {
+                        // Tìm kiếm dữ liệu ytInitialData trong script
+                        ytInitialDataScript = script;
+
+                        // Sử dụng regex để tìm ytInitialData, bao gồm cả các trường hợp có dấu ngoặc hoặc dấu chấm phẩy
+                        ytInitialDataMatch = script.match(/ytInitialData\s*=\s*({[\s\S]*?});/);
+
+                        if (ytInitialDataMatch) {
+                            console.log('Đã tìm thấy ytInitialData:', ytInitialDataMatch[1]);
+
+                            try {
+                                const ytInitialData = JSON.parse(ytInitialDataMatch[1]);
+
+                                // Kiểm tra xem phần `twoColumnWatchNextResults` có đầy đủ không
+                                if (ytInitialData.contents && ytInitialData.contents.twoColumnWatchNextResults) {
+                                    const twoColumnWatchNextResults = ytInitialData.contents.twoColumnWatchNextResults;
+
+                                    // Kiểm tra xem playlist có trong dữ liệu không
+                                    if (twoColumnWatchNextResults.secondaryResults) {
+                                        console.log('Playlist found:', twoColumnWatchNextResults.secondaryResults);
+                                    } else {
+                                        console.log('Không có playlist trong twoColumnWatchNextResults');
+                                    }
+                                } else {
+                                    console.log('Không tìm thấy twoColumnWatchNextResults trong ytInitialData');
+                                }
+                            } catch (e) {
+                                console.error('Lỗi khi parse ytInitialData:', e);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                /*dou me cay vl*/
+                if (ytInitialDataMatch) {
+                    console.log('Đã tìm thấy ytInitialData:', ytInitialDataMatch[0]);
+                    const ytInitialData = JSON.parse(ytInitialDataMatch[0]);
+
+                    // Tìm navigationEndpoint trong playlist
+                    const playlistData = ytInitialData?.contents?.twoColumnWatchNextResults?.playlist?.playlist?.contents
+
+                    const navigationEndpoint = playlistData?.navigationEndpoint;
+
+                    if (playlistData) {
+                        const url = navigationEndpoint?.commandMetadata?.webCommandMetadata?.url;
+                        if (url) {
+                            document.getElementById('result').textContent = url; // Hiển thị URL
+                        } else {
+                            document.getElementById('result').textContent = "Không tìm thấy url trong navigationEndpoint.";
+                        }
+                    } else {
+                        document.getElementById('result').textContent = "Không tìm thấy navigationEndpoint trong playlist.";
+                    }
+                } else {
+                    document.getElementById('result').textContent = "Không thể tìm thấy ytInitialData hợp lệ trong các script.";
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu:', error);
+                document.getElementById('result').textContent = 'Lỗi khi lấy dữ liệu, vui lòng thử lại sau.';
+            }
+        }
+    </script>
+</body>
+
+</html>

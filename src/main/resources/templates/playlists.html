@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Playlist</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/css/playlist.css}" rel="stylesheet" />
+    <script th:src="@{/js/playlistSv.js}"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header}"></div>
+    <div class="content">
+        <h2>Quản Lý Playlist</h2>
+        <div>
+            <input type="text" id="playlistName" placeholder="Tên playlist mới" />
+            <button onclick="createPlaylist()">Tạo Playlist</button>
+        </div>
+        <h3>Danh Sách Playlist</h3>
+        <div id="playlists">
+        </div>
+        <div id="playlistDetails" style="display: none;">
+        </div>
+        <audio id="audio-player" controls>
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+</body>
+</html>
