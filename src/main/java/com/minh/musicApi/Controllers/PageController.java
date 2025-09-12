@@ -48,7 +48,10 @@ public class PageController {
         addAuthStatusToModel(session, model);
         return "ytPlaylist";
     }
-
+    @GetMapping("/ytplay")
+    public String youtubePage() {
+        return "youtube-player"; 
+    }
     private void addAuthStatusToModel(HttpSession session, Model model) {
         model.addAttribute("isAuthenticated", session.getAttribute("userId") != null);
     }
