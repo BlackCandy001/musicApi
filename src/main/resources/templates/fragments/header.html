@@ -30,8 +30,9 @@
 <header>
     <nav class="navbar">
         <th:block th:if="${!isAuthenticated}">
-            <a href="/reg" id="register-link" class="nav-link">Register</a>
-            <a href="/log" id="login-link" class="nav-link">Login</a>
+            <a href="/home" id="home-link" class="nav-link">Home</a>
+            <!-- <a href="/reg" id="register-link" class="nav-link">Register</a>
+            <a href="/log" id="login-link" class="nav-link">Login</a> -->
         </th:block>
         <th:block th:if="${isAuthenticated}">
             <a href="/api/auth/logout" id="logout-link" class="nav-link">Logout</a>

@@ -43,6 +43,12 @@ public class PageController {
         addAuthStatusToModel(session, model);
         return "songSv";
     }
+    
+    @GetMapping("/home")
+    public String homePage(HttpSession session, Model model) {
+        addAuthStatusToModel(session, model);
+        return "home";
+    }
     @GetMapping("/ytpl")
     public String songYoutubePlPage(HttpSession session, Model model) {
         addAuthStatusToModel(session, model);

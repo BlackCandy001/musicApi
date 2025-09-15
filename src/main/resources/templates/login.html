@@ -7,14 +7,16 @@
     <script th:src="@{/js/log.js}"></script>
     <link th:href="@{/css/style.css}" rel="stylesheet" />
 </head>
-<body>
-    <div th:replace="~{fragments/header}"></div>
-    <div class="content">
-        <h2>Đăng Nhập</h2>
-        <input type="text" id="username" placeholder="Tên đăng nhập">
-        <input type="password" id="password" placeholder="Mật khẩu">
-        <button onclick="login()">Đăng Nhập</button>
-        <p>Chưa có tài khoản? <a href="register.html">Đăng ký</a></p>
-    </div>
+
+<body class="background">
+        <div th:replace="~{fragments/header}"></div>
+        <div class="content">
+            <h2>Đăng Nhập</h2>
+            <input type="text" id="username" placeholder="Tên đăng nhập">
+            <input type="password" id="password" placeholder="Mật khẩu">
+            <button onclick="login()">Đăng Nhập</button>
+            <p>Chưa có tài khoản? <a href="register.html">Đăng ký</a></p>
+        </div>
 </body>
+
 </html>
