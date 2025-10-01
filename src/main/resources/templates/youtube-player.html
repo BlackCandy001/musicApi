@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Audio Player</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+        }
+
+        /* Header placeholder */
+        .header {
+            height: 60px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Nội dung chính */
+        .contentSongList {
+            display: flex;
+            height: calc(100vh - 130px); /* trừ header và player bar */
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Bên trái: sound wave visualizer */
+        .visualizer {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 20px;
+        }
+
+        .visualizer canvas {
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(29, 185, 84, 0.3);
+            background: radial-gradient(circle, rgba(10,10,10,0.9), rgba(0,0,0,1));
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Bên phải: controls */
+        .song-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .song-section h2 {
+            margin-top: 0;
+            color: #1DB954;
+            text-align: center;
+        }
+
+        /* URL Input */
+        .url-input {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .url-input input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background-color: #282828;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .url-input input::placeholder {
+            color: #b3b3b3;
+        }
+
+        .url-input button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: none;
+            background-color: #1DB954;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .url-input button:hover {
+            background-color: #1ed760;
+        }
+
+        /* Status */
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #282828;
+            border-radius: 10px;
+            border-left: 4px solid #1DB954;
+        }
+
+        .status.error {
+            border-left-color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .status.success {
+            border-left-color: #1DB954;
+            background-color: rgba(29, 185, 84, 0.1);
+        }
+
+        /* Controls */
+        .controls {
+            background-color: #181818;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-play {
+            background-color: #1DB954;
+            color: #fff;
+        }
+
+        .btn-play:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .btn-pause, .btn-stop {
+            background-color: #404040;
+            color: #fff;
+        }
+
+        .btn-pause:hover, .btn-stop:hover {
+            background-color: #505050;
+        }
+
+        /* Sliders */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: #404040;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1DB954;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #1ed760;
+            transform: scale(1.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1DB954;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Time display */
+        .time-display {
+            text-align: center;
+            font-size: 16px;
+            color: #1DB954;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .volume-display {
+            min-width: 40px;
+            text-align: right;
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        /* Hidden player */
+        #player {
+            display: none;
+        }
+
+        /* Video info */
+        .video-info {
+            background-color: #282828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .video-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .video-id {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+
+        /* Player bar cố định */
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #181818;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid #333;
+            z-index: 1000;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #404040;
+            border-radius: 50%;
+            border-top-color: #1DB954;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .contentSongList {
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+            }
+            
+            .visualizer {
+                padding-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .visualizer canvas {
+                width: 100%;
+                max-width: 400px;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header placeholder -->
+    <div class="header">
+        <h1 style="margin: 0; color: #1DB954;">🎵 YouTube Audio Player</h1>
+    </div>
+
+    <div class="contentSongList">
+        <!-- Bên trái: sound wave -->
+        <div class="visualizer">
+            <canvas id="sound-visualizer" width="700" height="700"></canvas>
+        </div>
+
+        <!-- Bên phải: controls -->
+        <div class="song-section">
+            <h2>Phát nhạc từ YouTube</h2>
+
+            <!-- URL Input -->
+            <div class="url-input">
+                <input type="text" id="youtube-url" placeholder="Dán link YouTube vào đây (ví dụ: https://www.youtube.com/watch?v=...)">
+                <button onclick="loadVideo()">🎵 Tải nhạc</button>
+            </div>
+
+            <!-- Status -->
+            <div class="status" id="status">Nhập URL YouTube để bắt đầu</div>
+
+            <!-- Video Info -->
+            <div class="video-info" id="video-info" style="display: none;">
+                <div class="video-title" id="video-title">Đang tải thông tin video...</div>
+                <div class="video-id" id="video-id"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls" id="controls" style="display: none;">
+                <!-- Button Controls -->
+                <div class="button-group">
+                    <button class="btn btn-play" onclick="play()">
+                        ▶️ Play
+                    </button>
+                    <button class="btn btn-pause" onclick="pause()">
+                        ⏸️ Pause
+                    </button>
+                    <button class="btn btn-stop" onclick="stop()">
+                        ⏹️ Stop
+                    </button>
+                </div>
+
+                <!-- Time Display -->
+                <div class="time-display" id="time-display">0:00 / 0:00</div>
+
+                <!-- Seek Bar -->
+                <div class="control-group">
+                    <label>Tua nhạc:</label>
+                    <div class="slider-container">
+                        <span style="font-size: 12px; color: #b3b3b3;">0:00</span>
+                        <input type="range" class="slider" id="seek" min="0" max="100" value="0">
+                        <span id="duration-display" style="font-size: 12px; color: #b3b3b3;">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Volume Control -->
+                <div class="control-group">
+                    <label>Âm lượng:</label>
+                    <div class="slider-container">
+                        <span>🔊</span>
+                        <input type="range" class="slider" id="volume" min="0" max="100" value="50">
+                        <span class="volume-display" id="volume-display">50%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden YouTube Player -->
+    <div id="player"></div>
+
+    <!-- Player bar cố định (placeholder) -->
+    <div class="player-bar">
+        <div style="color: #b3b3b3; font-size: 14px;">
+            Sử dụng controls ở trên để điều khiển nhạc
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player, duration = 0, audioContext, analyser, dataArray, canvas, canvasContext;
+        let isPlayerReady = false;
+        let currentVideoId = null;
+
+        // Initialize visualizer
+        function initVisualizer() {
+            canvas = document.getElementById('sound-visualizer');
+            canvasContext = canvas.getContext('2d');
+            
+            // Create default visualization
+            drawDefaultVisualizer();
+        }
+
+        function drawDefaultVisualizer() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw concentric circles
+            const time = Date.now() * 0.002;
+            for (let i = 1; i <= 8; i++) {
+                canvasContext.beginPath();
+                const radius = 50 + i * 30 + Math.sin(time + i) * 10;
+                const opacity = 0.3 - (i * 0.03);
+                canvasContext.strokeStyle = `rgba(29, 185, 84, ${opacity})`;
+                canvasContext.lineWidth = 2;
+                canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                canvasContext.stroke();
+            }
+            
+            // Center dot
+            canvasContext.beginPath();
+            canvasContext.fillStyle = '#1DB954';
+            canvasContext.arc(centerX, centerY, 8, 0, Math.PI * 2);
+            canvasContext.fill();
+            
+            requestAnimationFrame(drawDefaultVisualizer);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+
+        function loadVideo() {
+            const url = document.getElementById('youtube-url').value.trim();
+            if (!url) {
+                updateStatus('Vui lòng nhập URL YouTube', 'error');
+                return;
+            }
+
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                updateStatus('URL YouTube không hợp lệ', 'error');
+                return;
+            }
+
+            currentVideoId = videoId;
+            updateStatus('Đang tải video... ⏳', 'info');
+            
+            // Show video info
+            document.getElementById('video-info').style.display = 'block';
+            document.getElementById('video-id').textContent = `Video ID: ${videoId}`;
+
+            if (isPlayerReady) {
+                player.loadVideoById(videoId);
+            } else {
+                // Initialize player if not ready
+                initializePlayer(videoId);
+            }
+        }
+
+        function extractVideoId(url) {
+            const patterns = [
+                /(?:v=|\/embed\/|\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+                /^[a-zA-Z0-9_-]{11}$/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function initializePlayer(videoId) {
+            if (window.YT && YT.Player) {
+                onYouTubeIframeAPIReady();
+            }
+        }
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '1',
+                width: '1',
+                videoId: currentVideoId || 'dQw4w9WgXcQ',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'playsinline': 1,
+                    'enablejsapi': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log('Player ready');
+            isPlayerReady = true;
+            updateStatus('Sẵn sàng phát nhạc! 🎵', 'success');
+            
+            // Show controls
+            document.getElementById('controls').style.display = 'block';
+            
+            // Set initial volume
+            player.setVolume(50);
+            
+            // Get duration and start updating
+            duration = player.getDuration();
+            updateTimeDisplay();
+            
+            // Update seek bar every second
+            setInterval(() => {
+                if (isPlayerReady) {
+                    updateSeek();
+                    updateTimeDisplay();
+                }
+            }, 1000);
+        }
+
+        function onPlayerStateChange(event) {
+            console.log('Player state changed:', event.data);
+            
+            // Update duration when video loads
+            if (event.data === 1 || event.data === 3) {
+                duration = player.getDuration();
+                updateTimeDisplay();
+                
+                // Try to get video title
+                updateVideoTitle();
+            }
+        }
+
+        function onPlayerError(event) {
+            console.error('Player error:', event.data);
+            const errors = {
+                '2': 'Yêu cầu không hợp lệ',
+                '5': 'Lỗi HTML5 player',
+                '100': 'Video không tồn tại hoặc đã bị xóa',
+                '101': 'Video không cho phép phát nhúng',
+                '150': 'Video không cho phép phát nhúng'
+            };
+            updateStatus('Lỗi: ' + (errors[event.data] || 'Lỗi không xác định'), 'error');
+        }
+
+        function updateVideoTitle() {
+            // Since we can't get title from YouTube API directly, show video ID
+            document.getElementById('video-title').textContent = `Video ID: ${currentVideoId}`;
+        }
+
+        function onPlayerError(event) {
+            console.error('Player error:', event.data);
+            const errors = {
+                '2': 'Yêu cầu không hợp lệ',
+                '5': 'Lỗi HTML5 player',
+                '100': 'Video không tồn tại hoặc đã bị xóa',
+                '101': 'Video không cho phép phát nhúng',
+                '150': 'Video không cho phép phát nhúng'
+            };
+            updateStatus('Lỗi: ' + (errors[event.data] || 'Lỗi không xác định'), 'error');
+        }
+
+        function play() {
+            if (isPlayerReady) {
+                player.playVideo();
+                updateStatus('Đang phát nhạc... 🎵', 'success');
+            }
+        }
+
+        function pause() {
+            if (isPlayerReady) {
+                player.pauseVideo();
+                updateStatus('Đã tạm dừng ⏸️', 'info');
+                isPlaying = false;
+            }
+        }
+
+        function stop() {
+            if (isPlayerReady) {
+                player.stopVideo();
+                updateStatus('Đã dừng phát ⏹️', 'info');
+                isPlaying = false;
+            }
+        }
+
+        function updateSeek() {
+            if (isPlayerReady && player.getCurrentTime) {
+                const current = player.getCurrentTime();
+                if (duration > 0) {
+                    const percentage = (current / duration) * 100;
+                    document.getElementById('seek').value = percentage;
+                }
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        function updateTimeDisplay() {
+            if (isPlayerReady && duration > 0) {
+                const current = player.getCurrentTime() || 0;
+                document.getElementById('time-display').textContent = 
+                    formatTime(current) + ' / ' + formatTime(duration);
+                
+                // Update duration display in seek bar
+                document.getElementById('duration-display').textContent = formatTime(duration);
+                
+                // Update current time in seek bar
+                const currentTimeSpan = document.querySelector('.slider-container span');
+                if (currentTimeSpan) {
+                    currentTimeSpan.textContent = formatTime(current);
+                }
+            }
+        }
+
+        // Event listeners
+        document.getElementById('seek').addEventListener('input', function(e) {
+            if (isPlayerReady && duration > 0) {
+                const seekTo = (e.target.value / 100) * duration;
+                player.seekTo(seekTo, true);
+            }
+        });
+
+        document.getElementById('volume').addEventListener('input', function(e) {
+            if (isPlayerReady) {
+                const volume = e.target.value;
+                player.setVolume(volume);
+                document.getElementById('volume-display').textContent = volume + '%';
+            }
+        });
+
+        // Enter key support for URL input
+        document.getElementById('youtube-url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadVideo();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initVisualizer();
+            
+            // Add some sample URLs as placeholder
+            const sampleUrls = [
+                'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                'https://www.youtube.com/watch?v=9bZkp7q19f0',
+                'https://youtu.be/dQw4w9WgXcQ'
+            ];
+            
+            console.log('Sample URLs you can try:', sampleUrls);
+        });
+    </script>
+</body>
+</html>
