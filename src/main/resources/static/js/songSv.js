@@ -33,12 +33,13 @@ function createSongElement(song) {
             <p class="song-artist">${song.artist}</p>
         </div>
         <div class="song-actions">
-            <button class="btn-circle" onclick="playSong(${song.id})">►</button>
-            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">＋</button>
+            <button class="btn-circle" onclick="playSong(${song.id})">▶️</button>
+            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">➕</button>
         </div>
     `;
     return songElement;
 }
+
 
 
 function playSong(songId) {
@@ -146,8 +147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const canvas = document.getElementById("sound-visualizer");
     const ctx = canvas.getContext("2d");
     let audioCtx, analyser, dataArray;
-    let isPlaying = false, animationTime = 0, visualStyle = 0;
+    let isPlaying = false, animationTime = 0, rotationAngle = 0;
 
+    // Khởi tạo âm thanh
     function initAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -166,43 +168,74 @@ document.addEventListener('DOMContentLoaded', async () => {
         requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas trước khi vẽ lại
         const cx = canvas.width / 2, cy = canvas.height / 2;
         animationTime += 0.02;
 
-        drawCircularBars(cx, cy); // bạn có thể đổi sang drawWaveCircle, drawParticleRing…
+        // Quả cầu quay 360 độ
+        ctx.save();
+        ctx.translate(cx, cy); // Di chuyển gốc tọa độ về trung tâm của canvas
+        ctx.rotate(rotationAngle); // Xoay quả cầu
+        ctx.translate(-cx, -cy); // Trở lại vị trí ban đầu của canvas
 
-        drawCenterGlow(cx, cy);
+        // Vẽ nửa trên
+        drawCircularBars(cx, cy, 1); // Nửa trên
+        // Vẽ nửa dưới (lật ngược)
+        drawCircularBars(cx, cy, -1); // Nửa dưới
+
+        drawCenterGlow(cx, cy); // Hiệu ứng sáng ở trung tâm quả cầu
+        ctx.restore();
+
+        // Hiệu ứng quay 360 độ
+        rotationAngle += 0.002;  // Điều chỉnh tốc độ quay
     }
 
-    function drawCircularBars(cx, cy) {
-        const radius = 120, barCount = 128;
-        for (let i = 0; i < barCount; i++) {
-            const angle = (i / barCount) * Math.PI * 2;
-            const idx = Math.floor((i / barCount) * dataArray.length);
-            const barHeight = (dataArray[idx] || 0) * 0.8 + 10;
-            const innerX = cx + Math.cos(angle) * radius;
-            const innerY = cy + Math.sin(angle) * radius;
-            const outerX = cx + Math.cos(angle) * (radius + barHeight);
-            const outerY = cy + Math.sin(angle) * (radius + barHeight);
+    function drawCircularBars(cx, cy, flip) {
+    const radius = 120, barCount = 32;
+    const direction = flip === -1 ? Math.PI : 0;
+    
+    // Kiểm tra tiếng bass (tần số thấp, thường ở phần đầu của dataArray)
+    const bassThreshold = 100; // Ngưỡng để xác định bass mạnh, có thể điều chỉnh
+    const bassStrength = dataArray.slice(0, Math.floor(dataArray.length * 0.2)).reduce((a, b) => a + b, 0) / (dataArray.length * 0.2);
+    const isBassStrong = bassStrength > bassThreshold;
 
-            const hue = (i / barCount) * 360 + animationTime * 50;
-            const gradient = ctx.createLinearGradient(innerX, innerY, outerX, outerY);
-            gradient.addColorStop(0, `hsla(${hue},70%,50%,0.8)`);
-            gradient.addColorStop(1, `hsla(${hue+60},70%,70%,1)`);
+    for (let i = 0; i < barCount; i++) {
+        const angle = (i / barCount) * Math.PI + direction;
+        const idx = Math.floor((i / barCount) * dataArray.length);
+        const rawBarHeight = (dataArray[idx] || 0) * 0.8 + 10;
 
-            ctx.beginPath();
-            ctx.moveTo(innerX, innerY);
-            ctx.lineTo(outerX, outerY);
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 4;
-            ctx.lineCap = "round";
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = `hsla(${hue},70%,50%,0.8)`;
-            ctx.stroke();
+        // Tính hệ số tỷ lệ từ 0.2 (20%) đến 0.8 (80%)
+        let scaleFactor = 0.2 + (0.6 * (i / (barCount - 1))); // Tăng tuyến tính từ 20% đến 80%
+
+        // Tăng 10% cho các thanh ở giữa nếu có bass mạnh
+        if (isBassStrong && i >= barCount * 0.3 && i <= barCount * 0.7) {
+            scaleFactor += 0.1; // Tăng 10% cho các thanh ở giữa (30%-70% dải)
         }
-    }
 
+        const barHeight = rawBarHeight * scaleFactor;
+
+        const innerX = cx + Math.cos(angle) * radius;
+        const innerY = cy + Math.sin(angle) * radius;
+        const outerX = cx + Math.cos(angle) * (radius + barHeight);
+        const outerY = cy + Math.sin(angle) * (radius + barHeight);
+
+        const hue = (i / barCount) * 360 + animationTime * 50;
+        const gradient = ctx.createLinearGradient(innerX, innerY, outerX, outerY);
+        gradient.addColorStop(0, `hsla(${hue},70%,50%,0.8)`);
+        gradient.addColorStop(1, `hsla(${hue+60},70%,70%,1)`);
+
+        ctx.beginPath();
+        ctx.moveTo(innerX, innerY);
+        ctx.lineTo(outerX, outerY);
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = `hsla(${hue},70%,50%,0.8)`;
+        ctx.stroke();
+    }
+}
+    // Vẽ ánh sáng ở trung tâm
     function drawCenterGlow(cx, cy) {
         let avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
         const pulse = 30 + (avg / 255) * 40;
@@ -229,8 +262,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         draw();
         audioCtx.resume();
     });
+
     audio.addEventListener("pause", () => { isPlaying = false; });
 });
+
+
+
 
 
 function showToast(message, type = "success") {
