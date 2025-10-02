@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.minh.musicApi.Models.Dto.SongProjection;
+import com.minh.musicApi.Models.Dto.SongTitleArtistDto;
 import com.minh.musicApi.Models.Entity.Song;
 
 public interface SongRepository extends JpaRepository<Song, Long> {
@@ -20,5 +21,5 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             "FROM Song s JOIN s.playlists p WHERE p.id = :playlistId")
      List<SongProjection> findAllSongsByPlaylistId(@Param("playlistId") Long playlistId);
 
-    List<Song> findByTitleContainingIgnoreCase(String name);
+    List<SongTitleArtistDto> findByTitleContainingIgnoreCase(String name);
 }
