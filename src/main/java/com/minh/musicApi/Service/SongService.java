@@ -1,11 +1,11 @@
 package com.minh.musicApi.Service;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.minh.musicApi.Models.Dto.SongProjection;
+import com.minh.musicApi.Models.Dto.SongTitleArtistDto;
 import com.minh.musicApi.Models.Entity.Song;
 import com.minh.musicApi.Repository.SongRepository;
 
@@ -28,7 +28,8 @@ public class SongService {
         song.setFileData(file.getBytes());
         songRepository.save(song);
     }
- public void uploadSong(File file, String title, String artist) throws IOException {
+
+    public void uploadSong(File file, String title, String artist) throws IOException {
         // Read the file as bytes
         byte[] fileData = Files.readAllBytes(file.toPath());
 
@@ -36,22 +37,25 @@ public class SongService {
         Song song = new Song();
         song.setTitle(title);
         song.setArtist(artist);
-        song.setFileData(fileData);  // Set the file content as bytes
-        
+        song.setFileData(fileData); // Set the file content as bytes
+
         // Save the song to the repository (database)
         songRepository.save(song);
     }
+
     public byte[] playSong(Long songId) {
         Song song = songRepository.findById(songId).orElseThrow(() -> new RuntimeException("Song not found"));
         return song.getFileData();
     }
 
-     public List<SongProjection> getAllSongs() {
+    public List<SongProjection> getAllSongs() {
         return songRepository.findAllProjected();
     }
-    public List<Song> findByName(String name){
+
+    public List<SongTitleArtistDto> findByName(String name) {
         return songRepository.findByTitleContainingIgnoreCase(name);
     }
+
     public Song getSongById(Long songId) {
         return songRepository.findById(songId).orElseThrow(() -> new RuntimeException("Song not found"));
     }
