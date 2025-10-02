@@ -58,12 +58,6 @@ body {
 }
 
 /* Bài hát */
-.song-section {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
 .song-item {
     display: flex;
     justify-content: space-between;
@@ -72,20 +66,15 @@ body {
     margin: 6px 0;
     background-color: #181818;
     border-radius: 6px;
-    transition: background 0.3s;
-}
-
-.song-item:hover {
-    background-color: #282828;
-}
-
-.song-item:hover {
-    background-color: #282828;
+    transition: transform 0.3s, box-shadow 0.3s ease-in-out;
+    position: relative;
+    width: 100%; /* Đảm bảo phần tử chiếm 100% chiều rộng của container */
 }
 
 .song-meta {
     display: flex;
     flex-direction: column;
+    flex: 1; /* Chiếm hết không gian còn lại */
 }
 
 .song-title {
@@ -93,6 +82,10 @@ body {
     font-size: 14px;
     font-weight: bold;
     color: #fff;
+    white-space: nowrap; /* Ngăn tiêu đề xuống dòng */
+    overflow: hidden; /* Ẩn phần text vượt quá */
+    text-overflow: ellipsis; /* Hiển thị ba chấm nếu tiêu đề quá dài */
+    max-width: 80%; /* Giới hạn chiều rộng của tiêu đề (80% của container) */
 }
 
 .song-artist {
@@ -101,23 +94,59 @@ body {
     color: #b3b3b3;
 }
 
-/* Nút tròn */
+.song-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0; /* Đảm bảo các nút không bị co lại */
+}
+
 .btn-circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
     border: none;
     background-color: #1DB954;
     color: #fff;
-    font-size: 14px;
+    font-size: 18px;
     cursor: pointer;
-    margin-left: 6px;
-    transition: background 0.3s;
+    margin-left: 8px;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 
 .btn-circle:hover {
     background-color: #1ed760;
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
+
+.btn-circle:before {
+    content: ''; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.btn-circle:hover:before {
+    opacity: 1;
+}
+
+/* Nếu bạn muốn icon trong nút không có màu, có thể thay đổi màu sắc nút */
+.btn-circle svg {
+    fill: rgba(255, 255, 255, 0.7); /* Hoặc thay bằng màu khác */
+}
+
+
 
 /* Player bar */
 .player-bar {
