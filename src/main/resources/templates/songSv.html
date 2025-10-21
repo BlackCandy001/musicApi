@@ -8,16 +8,12 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" />
     <link th:href="@{/css/songSv.css}" rel="stylesheet" />
     <script th:src="@{/js/songSv.js}"></script>
+    <script th:src="@{/js/common.js}"></script>
 </head>
 <body>
     <div th:replace="~{fragments/header}"></div>
 
     <div class="contentSongList">
-        <!-- Bên trái: sound wave -->
-        <div class="visualizer">
-          <canvas id="sound-visualizer" width="700" height="700"></canvas>
-        </div>
-
         <!-- Bên phải: danh sách nhạc -->
         <div class="song-section">
             <div class="search-bar">

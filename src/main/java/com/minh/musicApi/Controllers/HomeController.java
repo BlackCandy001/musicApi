@@ -22,10 +22,10 @@ import java.util.List;
 public class HomeController {
     @Autowired
 
-    private UserService userService;
-
     @PostMapping("/home")
-    public User register(@Validated @RequestBody User user) {
-        return userService.registerUser(user);
+    public String home() {
+        return "home";
+    //public User register(@Validated @RequestBody User user) {
+      //  return userService.registerUser(user);
     }
 }

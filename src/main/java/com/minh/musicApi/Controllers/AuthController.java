@@ -2,7 +2,11 @@ package com.minh.musicApi.Controllers;
 
 import com.minh.musicApi.Models.Entity.User;
 import com.minh.musicApi.Service.UserService;
+import com.minh.musicApi.common.ResponseConstants;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,23 +24,40 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public String login(@RequestParam String username,@RequestParam String password,HttpSession session) {
+    public ResponseEntity<?> login(
+            @RequestParam String username,
+            @RequestParam String password,
+            HttpSession session) {
+        
         boolean isAuthenticated = userService.authenticate(username, password);
+
         if (isAuthenticated) {
             User user = userService.findByUsername(username);
             if (user != null) {
                 session.setAttribute("userId", user.getId());
-                return "Đăng nhập thành công";
+                return ResponseEntity.ok().body(Map.of(
+                    "status", ResponseConstants.Common.SUCCESS,
+                    "message", ResponseConstants.Login.LOGIN_SUCCESS
+                ));
             }
-            return "Không tìm thấy người dùng";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", ResponseConstants.Common.ERROR,
+                "field", "username",
+                "message", ResponseConstants.Login.USER_NOT_FOUND
+            ));
         }
-        return "Thông tin không hợp lệ";
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+            "status", "error",
+            "field", "password",
+            "message", ResponseConstants.Login.INVALID_CREDENTIALS
+        ));
     }
 
     @GetMapping("/logout")
     public RedirectView logout(HttpSession session) {
         session.invalidate();
-        return new RedirectView("/log");
+        return new RedirectView("/home");
     }
 
     @GetMapping("/status")

@@ -1,7 +1,8 @@
-async function register() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const email = document.getElementById('email').value;
+async function register(event) {
+    event.preventDefault();
+    const username = document.getElementById('reg-username').value;
+    const password = document.getElementById('reg-password').value;
+    const email = document.getElementById('reg-email').value;
     try {
         const response = await fetch('/api/users/register', {
             method: 'POST',
@@ -17,7 +18,7 @@ async function register() {
 
         const user = await response.json();
         alert('Đăng ký thành công! ID người dùng: ' + user.id);
-        window.location.href = '/log';
+        window.location.href = '/home';
     } catch (error) {
         console.error('Lỗi:', error);
         alert('Đăng ký thất bại');
