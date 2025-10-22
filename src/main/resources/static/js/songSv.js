@@ -53,6 +53,7 @@ function openPlaylistModal(songId) {
     const modal = document.getElementById('playlist-modal');
     modal.style.display = 'block';
     window.currentSongId = songId;
+    loadPlaylists();
 }
 
 function closeModal() {
@@ -68,7 +69,7 @@ async function addSongToPlaylist(playlistId, songId) {
         });
 
         if (response.ok) {
-            showToast('Thêm vào danh sách phát thành công!', 'error');
+            showToast('Thêm vào danh sách phát thành công!', 'success');
             closeModal();
         } else {
             showToast('Lỗi khi thêm vào danh sách phát.', 'error');
@@ -78,27 +79,40 @@ async function addSongToPlaylist(playlistId, songId) {
     }
 }
 
+// kiểm tra đăng nhập (change)
 async function fetchCurrentUserId() {
     try {
         const response = await fetch('/api/auth/getCurrentUserId');
         const text = await response.text();
+
         const match = text.match(/Current User ID: (\d+)/);
+
         if (!match) throw new Error('Người dùng chưa đăng nhập');
+
         currentUserId = match[1];
+        showToast('Đăng nhập thành công', 'success', 5000);
+
+        console.log('User ID:', currentUserId);
+
     } catch (error) {
         console.error('Lỗi:', error);
         showToast(error.message, 'error');
     }
 }
 
+
 async function loadPlaylists() {
+        if (!currentUserId) {
+        console.warn("Chưa có user ID, không thể tải playlist");
+        return;
+    } // khóa an toàn cho loand playlist
     try {
         const response = await fetch(`/api/users/${currentUserId}/playlists`);
         const playlists = await response.json();
         renderPlaylistOptions(playlists);
     } catch (error) {
         console.error('Lỗi:', error);
-        showToast('Không thể tải danh sách playlist', 'error');
+        showToast('Không thể tải danh sách playlist', 'error', 5000);
     }
 }
 
@@ -107,17 +121,33 @@ function renderPlaylistOptions(playlists) {
     playlistContainer.innerHTML = ''; // Reset list
     if (playlists.length === 0) {
         playlistContainer.innerHTML = "<p>Không có danh sách phát nào.</p>";
+
         return;
     }
 
-    playlists.forEach(playlist => {
-        const option = document.createElement('div');
-        option.innerHTML = `
-            <p>${playlist.name}</p>
-            <button onclick="addSongToPlaylist(${playlist.id}, window.currentSongId)">Thêm</button>
-        `;
-        playlistContainer.appendChild(option);
+  playlists.forEach(playlist => {
+    const option = document.createElement('div');
+    option.classList.add('playlist-option');
+    option.textContent = playlist.name;
+    option.style.cursor = 'pointer';
+
+    //css
+    option.style.backgroundColor = '#4CAF50';
+    option.style.border = '2px solid #000';
+    option.style.padding = '10px';
+    option.style.margin = '5px 0';
+    option.style.cursor = 'pointer';
+    option.style.borderRadius = '5px';
+    option.style.color = 'white';
+    option.style.fontWeight = 'bold';
+
+    //sự kiện click
+    option.addEventListener('click', () => {
+        addSongToPlaylist(playlist.id, window.currentSongId);
     });
+    
+    playlistContainer.appendChild(option);
+});
 }
 
 async function searchSong() {
@@ -141,13 +171,13 @@ async function searchSong() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchCurrentUserId();
-    await loadPlaylists();
+    await loadPlaylists(); // làm mới playlist
     await loadSongs();
     const audio = document.getElementById("audio-player");
-    const canvas = document.getElementById("sound-visualizer");
-    const ctx = canvas.getContext("2d");
-    let audioCtx, analyser, dataArray;
-    let isPlaying = false, animationTime = 0, rotationAngle = 0;
+   // const canvas = document.getElementById("sound-visualizer"); //hiệu ứng
+    //const ctx = canvas.getContext("2d");
+    //let audioCtx, analyser, dataArray;
+    //let isPlaying = false, animationTime = 0, visualStyle = 0;
 
     // Khởi tạo âm thanh
     function initAudio() {
@@ -163,98 +193,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function draw() {
-        if (!isPlaying) return;
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas trước khi vẽ lại
-        const cx = canvas.width / 2, cy = canvas.height / 2;
-        animationTime += 0.02;
-
-        // Quả cầu quay 360 độ
-        ctx.save();
-        ctx.translate(cx, cy); // Di chuyển gốc tọa độ về trung tâm của canvas
-        ctx.rotate(rotationAngle); // Xoay quả cầu
-        ctx.translate(-cx, -cy); // Trở lại vị trí ban đầu của canvas
-
-        // Vẽ nửa trên
-        drawCircularBars(cx, cy, 1); // Nửa trên
-        // Vẽ nửa dưới (lật ngược)
-        drawCircularBars(cx, cy, -1); // Nửa dưới
-
-        drawCenterGlow(cx, cy); // Hiệu ứng sáng ở trung tâm quả cầu
-        ctx.restore();
-
-        // Hiệu ứng quay 360 độ
-        rotationAngle += 0.002;  // Điều chỉnh tốc độ quay
-    }
-
-    function drawCircularBars(cx, cy, flip) {
-    const radius = 120, barCount = 32;
-    const direction = flip === -1 ? Math.PI : 0;
-    
-    // Kiểm tra tiếng bass (tần số thấp, thường ở phần đầu của dataArray)
-    const bassThreshold = 100; // Ngưỡng để xác định bass mạnh, có thể điều chỉnh
-    const bassStrength = dataArray.slice(0, Math.floor(dataArray.length * 0.2)).reduce((a, b) => a + b, 0) / (dataArray.length * 0.2);
-    const isBassStrong = bassStrength > bassThreshold;
-
-    for (let i = 0; i < barCount; i++) {
-        const angle = (i / barCount) * Math.PI + direction;
-        const idx = Math.floor((i / barCount) * dataArray.length);
-        const rawBarHeight = (dataArray[idx] || 0) * 0.8 + 10;
-
-        // Tính hệ số tỷ lệ từ 0.2 (20%) đến 0.8 (80%)
-        let scaleFactor = 0.2 + (0.6 * (i / (barCount - 1))); // Tăng tuyến tính từ 20% đến 80%
-
-        // Tăng 10% cho các thanh ở giữa nếu có bass mạnh
-        if (isBassStrong && i >= barCount * 0.3 && i <= barCount * 0.7) {
-            scaleFactor += 0.1; // Tăng 10% cho các thanh ở giữa (30%-70% dải)
-        }
-
-        const barHeight = rawBarHeight * scaleFactor;
-
-        const innerX = cx + Math.cos(angle) * radius;
-        const innerY = cy + Math.sin(angle) * radius;
-        const outerX = cx + Math.cos(angle) * (radius + barHeight);
-        const outerY = cy + Math.sin(angle) * (radius + barHeight);
-
-        const hue = (i / barCount) * 360 + animationTime * 50;
-        const gradient = ctx.createLinearGradient(innerX, innerY, outerX, outerY);
-        gradient.addColorStop(0, `hsla(${hue},70%,50%,0.8)`);
-        gradient.addColorStop(1, `hsla(${hue+60},70%,70%,1)`);
-
-        ctx.beginPath();
-        ctx.moveTo(innerX, innerY);
-        ctx.lineTo(outerX, outerY);
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 8;
-        ctx.lineCap = "round";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = `hsla(${hue},70%,50%,0.8)`;
-        ctx.stroke();
-    }
-}
-    // Vẽ ánh sáng ở trung tâm
-    function drawCenterGlow(cx, cy) {
-        let avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-        const pulse = 30 + (avg / 255) * 40;
-        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, pulse);
-        gradient.addColorStop(0, "rgba(255,255,255,0.8)");
-        gradient.addColorStop(0.5, "rgba(29,185,84,0.6)");
-        gradient.addColorStop(1, "rgba(29,185,84,0)");
-        ctx.beginPath();
-        ctx.arc(cx, cy, pulse, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, 15, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff";
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "#fff";
-        ctx.fill();
-    }
 
     audio.addEventListener("play", () => {
         initAudio();
@@ -265,21 +203,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     audio.addEventListener("pause", () => { isPlaying = false; });
 });
-
-
-
-
-
-function showToast(message, type = "success") {
-    const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.innerText = message;
-
-    container.appendChild(toast);
-
-    // Tự remove sau khi animation kết thúc (~3.5s)
-    setTimeout(() => {
-        toast.remove();
-    }, 3500);
-}

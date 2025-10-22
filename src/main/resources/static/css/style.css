@@ -18,3 +18,44 @@ button {
     color: white;
     border: none;
 }
+.background {
+margin: 0;
+height: 100vh;
+background: linear-gradient(270deg, #7c3aed, #06b6d4, #ec4899);
+background-size: 600% 600%;
+animation: gradientMove 12s ease infinite;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Thông báo */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+}
+
+.toast {
+    background: rgba(40, 40, 40, 0.95);
+    color: #fff;
+    padding: 12px 20px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 14px;
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideIn 0.4s forwards, fadeOut 0.4s forwards 3s;
+}
+
+.toast.success {
+    border-left: 4px solid #1DB954;
+}
+
+.toast.error {
+    border-left: 4px solid #e74c3c;
+}

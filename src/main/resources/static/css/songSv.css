@@ -14,20 +14,7 @@ body {
     margin: 0 auto;
 }
 
-/* Bên trái: visualizer */
-.visualizer {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.visualizer canvas {
-    border-radius: 20px;
-    box-shadow: 0 0 50px rgba(29, 185, 84, 0.3);
-    background: radial-gradient(circle, rgba(10,10,10,0.9), rgba(0,0,0,1));
-    max-width: 100%;
-    height: auto;
-}
+
 /* Thanh tìm kiếm */
 .search-bar {
     display: flex;
@@ -35,21 +22,22 @@ body {
 }
 
 .search-bar input {
-    flex: 1;
-    padding: 10px;
+margin-left: 10px;
+    padding: 10px 15px;
     border-radius: 20px;
     border: none;
-    outline: none;
+    background-color: #ffffff;
+    color: #000000;
+    cursor: pointer;
 }
 
 .search-bar button {
     margin-left: 10px;
+    flex: 1;
     padding: 10px 15px;
-    border-radius: 20px;
+    border-radius: 10px;
     border: none;
-    background-color: #1DB954;
-    color: #fff;
-    cursor: pointer;
+    outline: none;
     transition: background 0.3s;
 }
 
@@ -187,7 +175,6 @@ body {
     width: 300px;
     text-align: center;
 }
-
 /* Thông báo */
 #toast-container {
     position: fixed;
@@ -216,6 +203,8 @@ body {
 .toast.error {
     border-left: 4px solid #e74c3c;
 }
+
+
 
 @keyframes slideIn {
     to {
