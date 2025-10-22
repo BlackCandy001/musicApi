@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music API Chat & Room</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; }
+    #login, #room { margin: 20px auto; width: 400px; padding: 20px; background: white; border-radius: 8px; }
+    #messages { height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+    .msg { margin: 5px 0; }
+    input, button { padding: 8px; margin-top: 5px; width: 100%; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div id="login">
+  <h3>Login</h3>
+  <input type="text" id="username" placeholder="Enter your username">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="room" style="display:none;">
+  <h3>Welcome, <span id="userLabel"></span></h3>
+
+  <div>
+    <input type="text" id="roomName" placeholder="Room name">
+    <button onclick="createRoom()">Create Room</button>
+  </div>
+
+  <div>
+    <input type="text" id="roomCode" placeholder="Enter Room Code">
+    <button onclick="joinRoom()">Join Room</button>
+  </div>
+
+  <div id="chatArea" style="display:none;">
+    <h4>Room: <span id="currentRoom"></span></h4>
+    <div id="messages"></div>
+    <input type="text" id="chatInput" placeholder="Type message..." onkeypress="if(event.key==='Enter'){sendMessage()}">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="leaveRoom()">Leave Room</button>
+    <hr>
+    <button onclick="startVoiceCall()">🎤 Start Voice Chat</button>
+    <audio id="remoteAudio" autoplay></audio>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script>
+let stompClient = null;
+let username = null;
+let currentRoomCode = null;
+let currentUserId = null;
+let localStream;
+let peerConnection;
+
+// ==== LẤY USER ID TỪ BACKEND ====
+async function fetchCurrentUserId() {
+    try {
+        const response = await fetch("/api/auth/getCurrentUserId");
+        const text = await response.text();
+        const match = text.match(/Current User ID: (\d+)/);
+        if (!match) throw new Error("Người dùng chưa đăng nhập");
+        currentUserId = match[1];
+        console.log("✅ Current User ID:", currentUserId);
+    } catch (error) {
+        console.error("Lỗi:", error);
+        alert(error.message);
+    }
+}
+
+// ==== LOGIN ====
+async function login() {
+  username = document.getElementById("username").value.trim();
+  if (!username) return alert("Enter username");
+
+  // gọi backend lấy userId
+  await fetchCurrentUserId();
+
+  if (!currentUserId) return alert("Bạn chưa đăng nhập hợp lệ!");
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("room").style.display = "block";
+  document.getElementById("userLabel").innerText = username;
+}
+
+// ==== CONNECT WEBSOCKET ====
+function connectWebSocket(roomCode) {
+  let socket = new SockJS("http://localhost:8080/ws-chat");
+  stompClient = Stomp.over(socket);
+  stompClient.connect({}, function() {
+    stompClient.subscribe("/topic/room/" + roomCode, function(message) {
+      let msg = JSON.parse(message.body);
+      showMessage(msg.sender + ": " + msg.content);
+    });
+  });
+}
+
+function showMessage(message) {
+  let div = document.createElement("div");
+  div.className = "msg";
+  div.innerText = message;
+  document.getElementById("messages").appendChild(div);
+}
+
+// ==== CREATE ROOM ====
+async function createRoom() {
+  let roomName = document.getElementById("roomName").value.trim();
+  if (!roomName) return alert("Enter room name");
+  if (!currentUserId) return alert("Bạn chưa đăng nhập!");
+
+  let res = await fetch(`/api/rooms/create?ownerId=${currentUserId}&roomName=${encodeURIComponent(roomName)}`, {
+    method: "POST"
+  });
+  let room = await res.json();
+  currentRoomCode = room.roomCode;
+  document.getElementById("currentRoom").innerText = currentRoomCode;
+  document.getElementById("chatArea").style.display = "block";
+  connectWebSocket(currentRoomCode);
+}
+
+// ==== JOIN ROOM ====
+async function joinRoom() {
+  let code = document.getElementById("roomCode").value.trim();
+  if (!code) return alert("Enter room code");
+  if (!currentUserId) return alert("Bạn chưa đăng nhập!");
+
+  let res = await fetch(`/api/rooms/join?userId=${currentUserId}&roomCode=${code}`, { method: "POST" });
+  let room = await res.json();
+  currentRoomCode = room.roomCode;
+  document.getElementById("currentRoom").innerText = currentRoomCode;
+  document.getElementById("chatArea").style.display = "block";
+  connectWebSocket(currentRoomCode);
+}
+
+// ==== SEND MESSAGE ====
+function sendMessage() {
+  let msg = document.getElementById("chatInput").value.trim();
+  if (!msg || !stompClient) return;
+  stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
+    roomCode: currentRoomCode,
+    sender: username,
+    content: msg
+  }));
+  document.getElementById("chatInput").value = "";
+}
+
+// ==== LEAVE ROOM ====
+async function leaveRoom() {
+  if (!currentRoomCode || !currentUserId) return;
+  await fetch(`/api/rooms/leave?userId=${currentUserId}&roomCode=${currentRoomCode}`, { method: "POST" });
+  alert("You left room " + currentRoomCode);
+  location.reload();
+}
+</script>
+
+</body>
+</html>

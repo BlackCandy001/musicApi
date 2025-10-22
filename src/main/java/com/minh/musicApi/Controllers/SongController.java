@@ -1,6 +1,7 @@
 package com.minh.musicApi.Controllers;
 
 import com.minh.musicApi.Models.Dto.SongProjection;
+import com.minh.musicApi.Models.Dto.SongTitleArtistDto;
 import com.minh.musicApi.Models.Entity.Song;
 import com.minh.musicApi.Service.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class SongController {
                 .body(audioData);
     }
     @GetMapping("/search")
-    public List<Song> findListSong(@RequestParam String title) {
+    public List<SongTitleArtistDto> searchSongs(@RequestParam String title) {
         return songService.findByName(title);
     }
 }

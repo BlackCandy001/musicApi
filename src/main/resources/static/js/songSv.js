@@ -33,12 +33,13 @@ function createSongElement(song) {
             <p class="song-artist">${song.artist}</p>
         </div>
         <div class="song-actions">
-            <button class="btn-circle" onclick="playSong(${song.id})">►</button>
-            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">＋</button>
+            <button class="btn-circle" onclick="playSong(${song.id})">▶️</button>
+            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">➕</button>
         </div>
     `;
     return songElement;
 }
+
 
 
 function playSong(songId) {
@@ -199,5 +200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         draw();
         audioCtx.resume();
     });
+
     audio.addEventListener("pause", () => { isPlaying = false; });
 });
