@@ -92,7 +92,7 @@ margin-left: 10px;
 .btn-circle {
     width: 40px;
     height: 40px;
-    border-radius: 20px;
+    border-radius: 50%; /* Thay đổi từ 20px thành 50% */
     border: none;
     background-color: #1DB954;
     color: #fff;
@@ -103,16 +103,17 @@ margin-left: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative; /* Thêm position relative để :before hoạt động đúng */
+    overflow: hidden; /* Ẩn phần thừa của overlay */
 }
-
 
 .btn-circle:hover {
     background-color: #1ed760;
     transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.btn-circle:before {
+.btn-circle::before {
     content: ''; 
     position: absolute;
     top: 0;
@@ -123,15 +124,24 @@ margin-left: 10px;
     border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s;
+    pointer-events: none; /* Quan trọng: không chặn sự kiện click */
 }
 
-.btn-circle:hover:before {
+.btn-circle:hover::before {
     opacity: 1;
 }
 
-/* Nếu bạn muốn icon trong nút không có màu, có thể thay đổi màu sắc nút */
+/* Icon SVG bên trong nút */
 .btn-circle svg {
-    fill: rgba(255, 255, 255, 0.7); /* Hoặc thay bằng màu khác */
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    pointer-events: none; /* Không chặn sự kiện click */
+}
+
+/* Animation khi click */
+.btn-circle:active {
+    transform: scale(0.95);
 }
 
 
