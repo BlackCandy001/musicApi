@@ -1,43 +1,58 @@
 package com.minh.musicApi.Models.Entity;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-    import jakarta.persistence.*;
-    import lombok.*;
-    @Entity
-    @Getter
-    @Setter
-    @Table(name = "Songs")
-    public class Song {
+import jakarta.persistence.*;
+import lombok.*;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+@Entity
+@Getter
+@Setter
+@Table(name = "Songs")
+public class Song {
 
-        @Column(nullable = false , columnDefinition = "NVARCHAR(255)")
-        private String title;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @Column(nullable = false , columnDefinition = "NVARCHAR(255)")
-        private String artist;
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String title;
 
-        @Lob
-        @Column(nullable = false)
-        @JsonSerialize(using = ByteArrayToBase64Serializer.class) 
-        private byte[] fileData;
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    private String artist;
 
-        @Column(nullable = false)
-        private LocalDateTime uploadedAt;
+    // THAY ĐỔI: Lưu đường dẫn file thay vì byte[]
+    @Column(nullable = false, columnDefinition = "NVARCHAR(500)")
+    private String filePath;
 
-        @ManyToMany(mappedBy = "songs", fetch = FetchType.LAZY)
-        @JsonBackReference  
-        private List<Playlist> playlists;
+    // Thêm field lưu tên file gốc (optional)
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String originalFileName;
 
-        @PrePersist
-        protected void onCreate() {
-            uploadedAt = LocalDateTime.now();
-        }
+    // Thêm field lưu kích thước file (optional - để hiển thị)
+    @Column
+    private Long fileSize;
+
+    // Thêm field lưu loại file (optional)
+    @Column(columnDefinition = "NVARCHAR(50)")
+    private String contentType;
+
+    @Column(nullable = false)
+    private LocalDateTime uploadedAt;
+
+    @ManyToMany(mappedBy = "songs", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonBackReference
+    private List<Playlist> playlists;
+
+    @PrePersist
+    protected void onCreate() {
+        uploadedAt = LocalDateTime.now();
     }
+}

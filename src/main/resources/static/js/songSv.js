@@ -33,8 +33,16 @@ function createSongElement(song) {
             <p class="song-artist">${song.artist}</p>
         </div>
         <div class="song-actions">
-            <button class="btn-circle" onclick="playSong(${song.id})">▶️</button>
-            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">➕</button>
+           <button class="btn-circle" onclick="playSong(${song.id})">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+            <button class="btn-circle" onclick="openPlaylistModal(${song.id})">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
         </div>
     `;
     return songElement;
@@ -45,9 +53,21 @@ function createSongElement(song) {
 function playSong(songId) {
     const audioElement = document.getElementById('audio-player');
     const songUrl = `/api/songs/${songId}/play`;
-    audioElement.src = songUrl;
-    audioElement.play();
+
+    if (!audioElement.paused) {
+        audioElement.pause();
+    }
+
+    // Chỉ thay src khi khác với bài đang phát
+    if (audioElement.src !== window.location.origin + songUrl) {
+        audioElement.src = songUrl;
+        audioElement.load();
+    }
+
+    audioElement.play().catch(error => console.error('Lỗi khi phát bài hát:', error));
 }
+
+
 
 function openPlaylistModal(songId) {
     const modal = document.getElementById('playlist-modal');
@@ -102,7 +122,7 @@ async function fetchCurrentUserId() {
 
 
 async function loadPlaylists() {
-        if (!currentUserId) {
+    if (!currentUserId) {
         console.warn("Chưa có user ID, không thể tải playlist");
         return;
     } // khóa an toàn cho loand playlist
@@ -125,29 +145,29 @@ function renderPlaylistOptions(playlists) {
         return;
     }
 
-  playlists.forEach(playlist => {
-    const option = document.createElement('div');
-    option.classList.add('playlist-option');
-    option.textContent = playlist.name;
-    option.style.cursor = 'pointer';
+    playlists.forEach(playlist => {
+        const option = document.createElement('div');
+        option.classList.add('playlist-option');
+        option.textContent = playlist.name;
+        option.style.cursor = 'pointer';
 
-    //css
-    option.style.backgroundColor = '#4CAF50';
-    option.style.border = '2px solid #000';
-    option.style.padding = '10px';
-    option.style.margin = '5px 0';
-    option.style.cursor = 'pointer';
-    option.style.borderRadius = '5px';
-    option.style.color = 'white';
-    option.style.fontWeight = 'bold';
+        //css
+        option.style.backgroundColor = '#4CAF50';
+        option.style.border = '2px solid #000';
+        option.style.padding = '10px';
+        option.style.margin = '5px 0';
+        option.style.cursor = 'pointer';
+        option.style.borderRadius = '5px';
+        option.style.color = 'white';
+        option.style.fontWeight = 'bold';
 
-    //sự kiện click
-    option.addEventListener('click', () => {
-        addSongToPlaylist(playlist.id, window.currentSongId);
+        //sự kiện click
+        option.addEventListener('click', () => {
+            addSongToPlaylist(playlist.id, window.currentSongId);
+        });
+
+        playlistContainer.appendChild(option);
     });
-    
-    playlistContainer.appendChild(option);
-});
 }
 
 async function searchSong() {
@@ -155,7 +175,7 @@ async function searchSong() {
     const title = titleInput.value.trim();
 
     if (!title) {
-        showToast('Vui lòng nhập tên bài hát để tìm kiếm.','error');
+        showToast('Vui lòng nhập tên bài hát để tìm kiếm.', 'error');
         return;
     }
 
@@ -165,7 +185,7 @@ async function searchSong() {
         renderSongList(songs, 'song-list', 'Không tìm thấy bài hát nào.');
     } catch (error) {
         console.error('Lỗi:', error);
-        showToast('Không thể tìm kiếm bài hát.','error');
+        showToast('Không thể tìm kiếm bài hát.', 'error');
     }
 }
 
@@ -174,9 +194,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadPlaylists(); // làm mới playlist
     await loadSongs();
     const audio = document.getElementById("audio-player");
-   // const canvas = document.getElementById("sound-visualizer"); //hiệu ứng
+    // const canvas = document.getElementById("sound-visualizer"); //hiệu ứng
     //const ctx = canvas.getContext("2d");
-    //let audioCtx, analyser, dataArray;
+    let audioCtx, analyser, dataArray;
     //let isPlaying = false, animationTime = 0, visualStyle = 0;
 
     // Khởi tạo âm thanh
@@ -197,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     audio.addEventListener("play", () => {
         initAudio();
         isPlaying = true;
-        draw();
+        //draw();
         audioCtx.resume();
     });
 
