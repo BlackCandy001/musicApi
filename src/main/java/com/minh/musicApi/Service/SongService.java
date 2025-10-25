@@ -29,7 +29,7 @@ public class SongService {
     @Autowired
     private SongRepository songRepository;
 
-    private static final String UPLOAD_DIR = "uploads/songs/";
+    private static final String UPLOAD_DIR = "../uploads/songs/";
 
     /**
      * Upload bài hát từ MultipartFile (thường dùng cho upload qua API)
