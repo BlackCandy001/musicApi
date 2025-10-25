@@ -10,26 +10,40 @@
     <script th:src="@{/js/songSv.js}"></script>
     <script th:src="@{/js/common.js}"></script>
 </head>
+
 <body>
     <div th:replace="~{fragments/header}"></div>
-
-    <div class="contentSongList">
-        <!-- Bên phải: danh sách nhạc -->
-        <div class="song-section">
-            <div class="search-bar">
-                <input type="text" id="searchSong" placeholder="Tìm bài hát...">
-                <button onclick="searchSong()">🔍</button>
+    <div class="music-container">
+        <div class="vinyl-player">
+           <div class="music-desk">
+             <div class="record-wrapper">
+                <div class="record">
+                    <img src="/img/discimg.png" alt="Record" class="spinning-disc" id="record-img">
+                </div>
             </div>
+            <div class="controls">
+                <audio id="audio-player" controls></audio>
+            </div>
+           </div>
+        </div>
 
-            <h2>Danh Sách Bài Hát</h2>
-            <div id="song-list"></div>
+        <div class="contentSongList">
+            <!-- Bên phải: danh sách nhạc -->
+            <div class="song-section">
+                <div class="search-bar">
+                    <input type="text" id="searchSong" placeholder="Tìm bài hát...">
+                    <button onclick="searchSong()">🔍</button>
+                </div>
+
+                <h2>Danh Sách Bài Hát</h2>
+                <div id="song-list"></div>
+            </div>
         </div>
     </div>
-
     <!-- Player bar cố định -->
     <div class="player-bar">
+
         
-        <audio id="audio-player" controls></audio>
     </div>
 
     <!-- Modal playlist -->
