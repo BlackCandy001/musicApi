@@ -1,0 +1,105 @@
+    body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #fff;
+}
+/* Chỉ áp dụng cho phần upload */
+.upload-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); /* chừa chỗ cho header */
+  background: #181818;
+  color: #fff;
+  padding: 40px 20px;
+}
+/* Hộp nội dung */
+.upload-page .content {
+  background: #222;
+  border-radius: 12px;
+  padding: 30px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+/* Tiêu đề */
+.upload-page .content h2 {
+  color: #ffffff;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+/* Input chung */
+.upload-page input[type="file"],
+.upload-page input[type="text"] {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px 12px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+  outline: none;
+}
+
+.upload-page input::placeholder {
+  color: #aaa;
+}
+
+.upload-page input:focus {
+  border-color: #ffb347;
+}
+
+/* Nút tải lên */
+.upload-page button {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(90deg, #ffffff, #71717185);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+}
+
+.upload-page button:hover {
+  color: #fff;
+  filter: brightness(1.2); /* làm sáng màu nút thêm 20% */
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.871); /* viền sáng nhẹ */
+}
+
+
+/* Tùy chọn cho nút "Choose File" */
+.upload-page input[type="file"]::-webkit-file-upload-button {
+  background: #ff3539;
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+
+/* Nền cho website */
+.upload-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(-45deg, #c8c7c7, #3a3a3a, #2b2b2b, #1b1b1b);
+  background-size: 400% 400%;
+  animation: gradientMove 8s ease infinite;
+  color: #fff;
+  padding: 40px 20px;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

@@ -1,52 +1,168 @@
-
-
-h2 {
-    text-align: center;
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #121212;
+  color: #ffffff;
 }
 
-#playlists div {
-    border: 1px solid #ddd;
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
+/* Khung chính */
+.content {
+  max-width: 95%;
+  margin: 40px auto;
+  background: #1e1e1e;
+  padding: 25px 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-#playlists button {
-    margin-top: 10px;
-    padding: 5px 10px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
+/* Tiêu đề */
+h2, h3 {
+  text-align: center;
+  color: #fff;
+}
+/* Ô nhập + nút */
+#playlistName {
+  width: 60%;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  outline: none;
+  background: #3a3a3a;
+  color: white;
+}
+.findplaylist{
+  background-color: green;
+  position: relative;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
 }
 
-#playlists button:hover {
-    background-color: #45a049;
+.findplaylist:hover {
+    background-color: #1ed760;
+}
+.playlist {
+  position: relative;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #00000074 50%, #ffffff76 50%);
+  color: #ffffff; /* chữ mặc định đen ở vùng trắng */
+  overflow: hidden;
+}
+
+/* Hiệu ứng hover: đảo ngược màu */
+.playlist:hover {
+  background: linear-gradient(135deg, #ffffff7e 50%, #00000081 50%);
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 
-
-#playlistDetails {
-    display: none;
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+/* ============= BỐ CỤC 2 CONTAINER ============= */
+.playlist-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  height: 500px; /* cố định chiều cao */
 }
 
-ul {
-    list-style-type: none;
-    padding-left: 0;
+/* Khung bên trái: Danh sách playlist */
+.playlist-list {
+  flex: 1;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  overflow-y: auto;
+  background: #1f1f1f;
 }
 
-li {
-    padding: 5px 0;
+/* Khung bên phải: Chi tiết playlist */
+.playlist-details {
+  flex: 2;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  background: #242424;
+  overflow-y: auto;
+  color: #e0e0e0;
 }
 
-li:not(:last-child) {
-    border-bottom: 1px solid #ddd;
+/* Giữ kích thước cố định */
+.playlist-list, .playlist-details {
+  min-height: 100%;
+  min-width: 300px;
+  box-sizing: border-box;
 }
 
+/* Hiển thị placeholder khi rỗng */
+#playlistDetails .placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Khi có nội dung, placeholder ẩn đi */
+#playlistDetails.active .placeholder {
+  display: none;
+}
+
+/* Item playlist */
+.playlist-item {
+  background: #2e2e2e;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.playlist-item:hover {
+  background: #3a3a3a;
+  transform: translateY(-3px);
+}
+
+/* Audio player */
+#audio-player {
+  width: 100%;
+  margin-top: 25px;
+  border-radius: 8px;
+  background: #333;
+}
+
+/* Hiệu ứng nền chuyển động */
+.playlist-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(-45deg, #3a3a3a, #1b1b1b, #2b2b2b, #000);
+  background-size: 400% 400%;
+  animation: gradientMove 8s ease infinite;
+  color: #fff;
+  padding: 40px 20px;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Responsive cho mobile */
+@media (max-width: 900px) {
+  .playlist-container {
+    flex-direction: column;
+    height: auto;
+  }
+}
