@@ -64,6 +64,9 @@ public class PlaylistService {
         // Kiểm tra xem playlist có tồn tại không
         Playlist playlist = playlistRepository.findByIdAndUserId(playlistId, userId);
         if (playlist != null) {
+             // Xóa tất cả bài hát khỏi playlist
+        playlist.getSongs().clear(); // nếu mapping @ManyToMany với cascade thích hợp
+        playlistRepository.save(playlist);
             // Xóa playlist
             playlistRepository.delete(playlist);
             return true;
