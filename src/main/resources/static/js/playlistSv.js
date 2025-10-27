@@ -30,8 +30,8 @@ function createPlaylistElement(playlist) {
     playlistElement.innerHTML = `
         <h3>${playlist.name}</h3>
         <p>Số bài hát: ${playlist.songs ? playlist.songs.length : 0}</p>
-        <button onclick="viewPlaylist(${playlist.id})">Xem Playlist</button>
-        <button onclick="deletePlaylist(${playlist.id})">Xóa Playlist</button>
+        <button onclick="viewPlaylist(${playlist.id})" class="playlist">Xem Playlist</button>
+        <button onclick="deletePlaylist(${playlist.id})" class="playlist">Xóa Playlist</button>
     `;
     return playlistElement;
 }
@@ -116,7 +116,8 @@ function createSongElement(song) {
     songElement.innerHTML = `
         <h4>${song.title}</h4>
         <p>Ca sĩ: ${song.artist}</p>
-        <button onclick="playSong(${song.id})">Phát bài hát</button>
+        <button onclick="playSong(${song.id})" class="playlist">Phát bài hát</button>
+        <\hr> 
     `;
     return songElement;
 }

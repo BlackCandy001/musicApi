@@ -8,23 +8,30 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" />
     <link th:href="@{/css/playlist.css}" rel="stylesheet" />
     <script th:src="@{/js/playlistSv.js}"></script>
+        
 </head>
+
 <body>
     <div th:replace="~{fragments/header}"></div>
-    <div class="content">
-        <h2>Quản Lý Playlist</h2>
-        <div>
-            <input type="text" id="playlistName" placeholder="Tên playlist mới" />
-            <button onclick="createPlaylist()">Tạo Playlist</button>
+    <div class="playlist-page">
+        <div >
+            <h2>Quản Lý Playlist</h2>
+            <div>
+                <input type="text" id="playlistName" placeholder="Tên playlist mới" />
+                <button onclick="createPlaylist()" class="findplaylist">Tạo Playlist</button>
+            </div>
+            <h3>Danh Sách Playlist</h3>
+            <div class="playlist-container">
+                <div id="playlists" class="playlist-list">
+                </div>
+                <div id="playlistDetails" class="playlist-details">
+                </div>
+            </div>
+            <audio id="audio-player" controls>
+                Your browser does not support the audio element.
+            </audio>
         </div>
-        <h3>Danh Sách Playlist</h3>
-        <div id="playlists">
-        </div>
-        <div id="playlistDetails" style="display: none;">
-        </div>
-        <audio id="audio-player" controls>
-            Your browser does not support the audio element.
-        </audio>
     </div>
 </body>
+
 </html>
