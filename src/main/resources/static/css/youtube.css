@@ -1,0 +1,458 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #fff;
+}
+
+/* Header placeholder */
+.header {
+    height: 60px;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #333;
+}
+
+/* Nội dung chính */
+.contentSongList {
+    display: flex;
+    height: calc(100vh - 130px);
+    /* trừ header và player bar */
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Bên trái: sound wave visualizer */
+.visualizer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.visualizer canvas {
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(90, 90, 90, 0.3);
+    background: radial-gradient(circle, rgba(10, 10, 10, 0.9), rgba(0, 0, 0, 1));
+    max-width: 100%;
+    height: auto;
+}
+
+/* Bên phải: controls */
+.song-section {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.song-section h2 {
+    margin-top: 0;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* URL Input */
+.url-input {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.url-input input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    background-color: #fafafa;
+    color: #000000;
+    font-size: 14px;
+}
+
+.url-input input::placeholder {
+    color: #b3b3b3;
+}
+
+
+.url-input button {
+    margin-left: 10px;
+    padding: 12px 20px;
+    background: linear-gradient(90deg, #ffffff, #71717185);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+}
+
+.url-input button:hover {
+    color: #fff;
+    filter: brightness(1.2);
+    /* làm sáng màu nút thêm 20% */
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.871);
+    /* viền sáng nhẹ */
+}
+
+/* Status */
+.status {
+    text-align: center;
+    padding: 15px;
+    margin: 15px 0;
+    background-color: #ffffff;
+    color: #000;
+    border-radius: 10px;
+    border-left: 4px solid #7182ff;
+}
+
+.status.error {
+    border-left-color: #ff1900;
+    background-color: rgba(231, 76, 60, 0.1);
+    color: white;
+}
+
+.status.success {
+    border-left-color: #2866ee;
+    background-color: rgb(255, 255, 255);
+}
+
+/* Controls */
+.controls {
+    background-color: #181818;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.control-group {
+    margin: 15px 0;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-play {
+    background-color: #4a4a4a;
+    color: #ffffff;
+}
+
+.btn-play:hover {
+    background-color: #ffffff;
+    color: #000000;
+    transform: scale(1.05);
+}
+
+.btn-pause,
+.btn-stop {
+    background-color: #4a4a4a;
+    color: #ffffff;
+}
+
+.btn-pause:hover,
+.btn-stop:hover {
+    background-color: #ffffff;
+    color: #000000;
+    transform: scale(1.05);
+}
+
+/* Sliders */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #404040;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    background: #ffffff;
+    transform: scale(1.2);
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    border: none;
+}
+
+/* Time display */
+.time-display {
+    text-align: center;
+    font-size: 16px;
+    color: #ffffff;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.volume-display {
+    min-width: 40px;
+    text-align: right;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+/* Hidden player */
+#player {
+    display: none;
+}
+
+/* Video info */
+.video-info {
+    background-color: #282828;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.video-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.video-id {
+    font-size: 12px;
+    color: #b3b3b3;
+}
+
+/* Player bar cố định */
+.player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: #181818;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #333;
+    z-index: 1000;
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #404040;
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contentSongList {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .visualizer {
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .visualizer canvas {
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
+    }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Poppins:wght@500&display=swap');
+
+.music-title {
+    font-family: 'Audiowide', 'Poppins', sans-serif;
+    /* Font điện tử / nhạc */
+    font-size: 3em;
+    text-align: center;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    background: linear-gradient(270deg, #ff0040, #ff9900, #00ffff, #0077ff, #ff00ff);
+    background-size: 1500% 1500%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation: colorShift 6s ease infinite;
+    transition: transform 0.3s ease;
+
+    /* Hiệu ứng phát sáng nhẹ */
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Hiệu ứng gradient trượt */
+@keyframes colorShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* --- Hiệu ứng khung đèn động cho thumbnail --- */
+.thumbnail {
+    position: relative;
+    display: inline-block;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Vùng bao quanh thumbnail */
+.thumbnail {
+    position: relative;
+    display: inline-block;
+    border-radius: 12px;
+    padding: 8px;
+    /* tạo khoảng cho viền đèn */
+}
+
+/* Ảnh thumbnail */
+.thumbnail img {
+    display: block;
+    width: 600px;
+    border-radius: 10px;
+    position: relative;
+    z-index: 2;
+    /* đảm bảo ảnh nằm trên cùng */
+}
+
+/* Lớp hiệu ứng ánh sáng xoay quanh (phía sau ảnh) */
+.thumbnail .glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    z-index: 1;
+    background: conic-gradient(from 0deg,
+            rgba(0, 0, 0, 0),
+            #00dbde,
+            #fc00ff,
+            rgba(0, 0, 0, 0) 25%);
+    filter: blur(25px);
+    animation: spin 4s linear infinite;
+}
+
+.thumbnail .glow2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    z-index: 1;
+    background: conic-gradient(from 180deg,
+            rgba(0, 0, 0, 0),
+            #00dbde,
+            #fc00ff,
+            rgba(0, 0, 0, 0) 25%);
+    filter: blur(25px);
+    animation: spinReverse 4s linear infinite;
+}
+
+/* Animation quay vòng ánh sáng */
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinReverse {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* nền cho backgroud */
+
+.upload-page {
+    background: linear-gradient(-45deg, #c8c7c7, #3a3a3a, #2b2b2b, #1b1b1b);
+    background-size: 400% 400%;
+    animation: gradientMove 8s ease infinite;
+    color: #fff;
+    padding: 40px 20px;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
