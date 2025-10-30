@@ -5,6 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,31 +17,30 @@ import java.util.regex.Pattern;
 public class YouTubeController {
 
     private static final Pattern VIDEO_ID_PATTERN = Pattern.compile(
-            "(?:v=|\\/)([0-9A-Za-z_-]{11})(?:[&?]|$)"
-    );
+            "(?:v=|\\/)([0-9A-Za-z_-]{11})(?:[&?]|$)");
 
     // Endpoint trả trang HTML player
     @GetMapping("/playAudio")
     public String play(@RequestParam("url") String url, Model model) {
         System.out.println("Received URL: " + url); // Debug log
-        
+
         String videoId = extractVideoId(url);
         System.out.println("Extracted Video ID: " + videoId); // Debug log
-        
+
         if (videoId == null) {
             model.addAttribute("error", "Không nhận diện được videoId từ URL: " + url);
             return "error";
         }
-        
+
         // Không dùng autoplay=1 trong embed URL cho audio player
         String embedUrl = "https://www.youtube.com/embed/" + videoId + "?rel=0&modestbranding=1&enablejsapi=1";
         System.out.println("Generated Embed URL: " + embedUrl); // Debug log
-        
+
         model.addAttribute("embedUrl", embedUrl);
         model.addAttribute("videoId", videoId);
         model.addAttribute("originalUrl", url);
-        
-        return "youtube-player";
+
+        return "youtube-player"; // trả về trang youtube-player
     }
 
     // Endpoint REST trả JSON
@@ -66,11 +68,11 @@ public class YouTubeController {
             System.out.println("URL is null or empty");
             return null;
         }
-        
+
         // Clean URL
         url = url.trim();
         System.out.println("Processing URL: " + url);
-        
+
         // Pattern cho youtube.com/watch?v=
         Matcher m = VIDEO_ID_PATTERN.matcher(url);
         if (m.find()) {
@@ -78,7 +80,7 @@ public class YouTubeController {
             System.out.println("Found video ID with main pattern: " + videoId);
             return videoId;
         }
-        
+
         // Pattern cho youtu.be/
         Pattern shortPattern = Pattern.compile("youtu\\.be/([0-9A-Za-z_-]{11})");
         Matcher shortM = shortPattern.matcher(url);
@@ -87,7 +89,7 @@ public class YouTubeController {
             System.out.println("Found video ID with short pattern: " + videoId);
             return videoId;
         }
-        
+
         // Pattern cho youtube.com/embed/
         Pattern embedPattern = Pattern.compile("youtube\\.com/embed/([0-9A-Za-z_-]{11})");
         Matcher embedM = embedPattern.matcher(url);
@@ -96,8 +98,47 @@ public class YouTubeController {
             System.out.println("Found video ID with embed pattern: " + videoId);
             return videoId;
         }
-        
+
         System.out.println("No video ID found in URL: " + url);
         return null;
     }
+
+    @GetMapping("/title")
+    @ResponseBody
+    public ResponseEntity<?> getTitle(@RequestParam("url") String url){
+        String videoId = extractVideoId(url);
+        if(videoId == null){
+            return ResponseEntity.badRequest().body(Map.of("Error", "URL Youtube không hợp lệ"));
+        }
+        try{
+            // gọi oEmbed không cần API key
+            String oembedUrl = "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=" + videoId + "&format=json";
+            java.net.URL apiUrl = new java.net.URL(oembedUrl);
+            HttpURLConnection conn = (HttpURLConnection) apiUrl.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) response.append(line);
+            in.close();
+
+            // trích xuất title 
+            String json = response.toString();
+            String title = json.replaceAll(".*\"title\":\"(.*?)\".*", "$1");
+// trả về kết quar json
+            return ResponseEntity.ok(Map.of(
+                "videoId", videoId,
+                "title", title
+            ));
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of(
+                "error", "Không thể lấy tiêu đề video",
+                "message", e.getMessage()
+            ));
+        }
+    }
+
 }

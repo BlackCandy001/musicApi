@@ -52,12 +52,12 @@ public class PageController {
     @GetMapping("/ytpl")
     public String songYoutubePlPage(HttpSession session, Model model) {
         addAuthStatusToModel(session, model);
-        return "ytPlaylist";
+        return "youtube-player";
     }
-    @GetMapping("/ytplay")
-    public String youtubePage() {
-        return "youtube-player"; 
-    }
+   // @GetMapping("/ytplay")
+    //public String youtubePage() {
+      //  return "youtube-player"; 
+    //}
     private void addAuthStatusToModel(HttpSession session, Model model) {
         model.addAttribute("isAuthenticated", session.getAttribute("userId") != null);
     }
