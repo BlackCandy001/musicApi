@@ -1,5 +1,5 @@
 let currentUserId = null;
-
+let currentPlayListId = null;
 async function loadPlaylists() {
     try {
         const response = await fetch(`/api/users/${currentUserId}/playlists`);
@@ -7,7 +7,7 @@ async function loadPlaylists() {
         renderPlaylistList(playlists);
     } catch (error) {
         console.error('Lỗi:', error);
-        alert('Không thể tải playlist');
+        showToast('Không thể tải playlist');
     }
 }
 
@@ -45,22 +45,30 @@ async function deletePlaylist(playlistId) {
         });
 
         if (response.ok) {
-            alert('Playlist đã được xóa.');
-            loadPlaylists();
+            showToast('Playlist đã được xóa.');
+            await loadPlaylists();
+
+            if (currentPlayListId === playlistId){
+                const playlistDetails = document.getElementById('playlistDetails');
+                if(playlistDetails){
+                    playlistDetails.innerHTML = "<p>Playlist đã bị xóa!</p>";
+                }
+                currentPlayListId = null;
+            }
         } else {
             const error = await response.json();
-            alert(`Lỗi khi xóa playlist: ${error.message}`);
+            showToast(`Lỗi khi xóa playlist: ${error.message}`, 'error');
         }
     } catch (error) {
         console.error('Lỗi:', error);
-        alert('Không thể xóa playlist');
+        showToast('Không thể xóa playlist', 'error');
     }
 }
 
 async function createPlaylist() {
     const playlistName = document.getElementById('playlistName').value.trim();
     if (!playlistName) {
-        alert('Vui lòng nhập tên playlist.');
+        showToast('Vui lòng nhập tên playlist.', 'warning');
         return;
     }
 
@@ -74,17 +82,18 @@ async function createPlaylist() {
         if (!response.ok) throw new Error('Không thể tạo playlist');
         
         const newPlaylist = await response.json();
-        alert('Playlist mới đã được tạo');
+        showToast('Playlist mới đã được tạo', 'success');
         document.getElementById('playlistName').value = '';
         loadPlaylists();
     } catch (error) {
         console.error('Lỗi:', error);
-        alert('Không thể tạo playlist');
+        showToast('Không thể tạo playlist', 'error');
     }
 }
 
 async function viewPlaylist(playlistId) {
     try {
+        currentPlayListId = playlistId
         const response = await fetch(`/api/users/${currentUserId}/playlists/${playlistId}`);
         const songs = await response.json();
 
@@ -134,6 +143,24 @@ async function playSong(songId) {
     }
 }
 
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // Hiệu ứng hiện lên
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    // Tự ẩn sau 3s
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => toast.remove());
+    }, 3000);
+}
+
 async function fetchCurrentUserId() {
     try {
         const response = await fetch('/api/auth/getCurrentUserId');
@@ -143,7 +170,7 @@ async function fetchCurrentUserId() {
         currentUserId = match[1];
     } catch (error) {
         console.error('Lỗi:', error);
-        alert(error.message);
+        showToast(error.message);
     }
 }
 

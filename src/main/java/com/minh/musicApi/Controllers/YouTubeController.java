@@ -1,9 +1,13 @@
 package com.minh.musicApi.Controllers;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -102,9 +106,8 @@ public class YouTubeController {
         System.out.println("No video ID found in URL: " + url);
         return null;
     }
-
-    @GetMapping("/title")
-    @ResponseBody
+// hàm lấy title
+    @GetMapping(value = "/title", produces = "application/json; charset=UTF-8")@ResponseBody
     public ResponseEntity<?> getTitle(@RequestParam("url") String url){
         String videoId = extractVideoId(url);
         if(videoId == null){
@@ -118,7 +121,10 @@ public class YouTubeController {
             conn.setRequestMethod("GET");
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            //đọc nội dung UTF-8
+            BufferedReader in = new BufferedReader(
+            new InputStreamReader(conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8)
+        );
             StringBuilder response = new StringBuilder();
             String line;
             while ((line = in.readLine()) != null) response.append(line);
@@ -126,10 +132,13 @@ public class YouTubeController {
 
             // trích xuất title 
             String json = response.toString();
-            String title = json.replaceAll(".*\"title\":\"(.*?)\".*", "$1");
-// trả về kết quar json
-            return ResponseEntity.ok(Map.of(
-                "videoId", videoId,
+           String title = json.replaceAll(".*\"title\":\"(.*?)\".*", "$1")
+                           .replace("\\u0026", "&")  // decode ký tự escaped
+                           .replace("\\\"", "\"");
+            return ResponseEntity.ok()
+            .header("Content-Type", "application/json; charset=UTF-8")
+            .body(Map.of( 
+            "videoId", videoId,
                 "title", title
             ));
         }catch (Exception e){
@@ -140,5 +149,14 @@ public class YouTubeController {
             ));
         }
     }
+
+    // UNICODE
+    @Bean
+public ObjectMapper objectMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.getFactory().configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
+    return mapper;
+}
+
 
 }

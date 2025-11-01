@@ -30,7 +30,7 @@ body {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
+   /* align-items: center; */
     padding-right: 20px;
 }
 
@@ -456,3 +456,4 @@ body {
         background-position: 0% 50%;
     }
 }
+

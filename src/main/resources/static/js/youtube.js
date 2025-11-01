@@ -1,15 +1,7 @@
 let player, duration = 0, audioContext, analyser, dataArray, canvas, canvasContext;
 let isPlayerReady = false;
 let currentVideoId = null;
-
-// Initialize visualizer
-function initVisualizer() {
-    canvas = document.getElementById('sound-visualizer');
-    canvasContext = canvas.getContext('2d');
-
-    // Create default visualization
-    drawDefaultVisualizer();
-}
+let isPlaying = false;
 
 function drawDefaultVisualizer() {
     const centerX = canvas.width / 2;
@@ -65,7 +57,7 @@ function loadVideo() {
     document.getElementById('video-id').textContent = `Video ID: ${videoId}`;
     // Hiển thị thumbnail
     const thumbUrl = getThumbnailUrl(videoId);
-    document.getElementById('video-thumbnail').scr = thumbUrl;
+    document.getElementById('video-thumbnail').src = thumbUrl;
     if (isPlayerReady) {
         player.loadVideoById(videoId);
     } else {
@@ -91,7 +83,10 @@ function getThumbnailUrl(videoId, quality = 'maxresdefault') {
 }
 function initializePlayer(videoId) {
     if (window.YT && YT.Player) {
+        currentVideoId = videoId;
         onYouTubeIframeAPIReady();
+    } else {
+        console.warn("API chưa sẵn sàng, vui long thử lại sau!")
     }
 }
 
@@ -152,9 +147,9 @@ function onPlayerStateChange(event) {
         updateVideoTitle();
 
         if (event.data === YT.PlayerState.PLAYING) {
-    const id = player.getVideoData().video_id;
-    document.getElementById('video-thumbnail').src = getThumbnailUrl(id);
-}
+            const id = player.getVideoData().video_id;
+            document.getElementById('video-thumbnail').src = getThumbnailUrl(id);
+        }
 
     }
 }
@@ -169,45 +164,54 @@ function onPlayerError(event) {
         '150': 'Video không cho phép phát nhúng'
     };
     updateStatus('Lỗi: ' + (errors[event.data] || 'Lỗi không xác định'), 'error');
+}
+// hàm giải mã unicode
+function decodeUnicode(str) {
+    return str.replace(/\\u[\dA-Fa-f]{4}/g, match =>
+        String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+    );
 }
 
 // hàm lấy title video youtube
 async function updateVideoTitle() {
-//trả về nếu không có video ID
-    if(!currentVideoId) return;
-// tạo url yt gốc
+    //trả về nếu không có video ID
+    if (!currentVideoId) return;
+    // tạo url yt gốc
     const url = `https://www.youtube.com/watch?v=${currentVideoId}`;
-    
-    //gửi yêu cần về backend
-    try{
-        const res = await fetch(`/youtube/title?url=${encodeURIComponent(url)}`);
-        const data = await res.json(); // chờ phản hồi và chuyển dữ liệu về json
 
-        //hiển thị title
-        document.getElementById('video-title').textContent = data.title || `video ID: ${currentVideoId}`; 
-    } catch (err){ // trường hợp nếu lỗi
+    //gửi yêu cần về backend
+    try {
+        const res = await fetch(`/youtube/title?url=${encodeURIComponent(url)}`);
+if (!res.ok) throw new Error(`SERVER ERROR: ${res.status}`);
+        // Kiểm tra nếu server trả về JSON thật
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.warn("Phản hồi không phải JSON:", text);
+            data = { title: decodeUnicode(text) };
+        }
+
+        // Đảm bảo hiển thị đúng Unicode
+        let safeTitle = decodeUnicode(data.title || "")
+            .normalize("NFC")
+            .replace(/[\x00-\x1F\x7F]/g, "")
+            .trim();
+
+        document.getElementById('video-title').textContent =
+            safeTitle || `Video ID: ${currentVideoId}`;
+    } catch (err) { // trường hợp nếu lỗi
         console.error('Lỗi lấy tiêu đề:', err);
         document.getElementById('video-title').textContent = `Video ID: ${currentVideoId}`
     }
-}
-
-
-function onPlayerError(event) {
-    console.error('Player error:', event.data);
-    const errors = {
-        '2': 'Yêu cầu không hợp lệ',
-        '5': 'Lỗi HTML5 player',
-        '100': 'Video không tồn tại hoặc đã bị xóa',
-        '101': 'Video không cho phép phát nhúng',
-        '150': 'Video không cho phép phát nhúng'
-    };
-    updateStatus('Lỗi: ' + (errors[event.data] || 'Lỗi không xác định'), 'error');
 }
 
 function play() {
     if (isPlayerReady) {
         player.playVideo();
         updateStatus('Đang phát nhạc... 🎵', 'success');
+        isPlaying = true;
     }
 }
 
@@ -286,7 +290,6 @@ document.getElementById('youtube-url').addEventListener('keypress', function (e)
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function () {
-    initVisualizer();
 
     // Add some sample URLs as placeholder
     const sampleUrls = [
